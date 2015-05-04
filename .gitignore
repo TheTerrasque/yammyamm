@@ -1,0 +1,5 @@
+*.sqlite3
+*.pyc
+files/*
+local_settings.py
+yammies/settings_local.py
