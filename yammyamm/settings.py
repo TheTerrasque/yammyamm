@@ -117,4 +117,4 @@ STATIC_URL = '/static/'
 try:
     from settings_local import *
 except ImportError:
-    pass
+    print "Could not import local settings. Using defaults"

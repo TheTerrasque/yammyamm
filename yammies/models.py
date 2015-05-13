@@ -51,6 +51,7 @@ class Mod(models.Model):
         self.filesize = data["filesize"]
     
     def save(self, *args, **kwargs):
+        super(Mod, self).save(*args, **kwargs)
         self.update_file_data()
         super(Mod, self).save(*args, **kwargs)
     
@@ -68,9 +69,23 @@ class ModDependency(models.Model):
     
     def __unicode__(self):
         return "<%s> %s %s" % (self.mod, self.get_relation_display(), self.dependency)
-    
+ 
+@receiver(post_save, sender=HostMirror)
+def save_json3(sender, **kwargs):
+    if settings.YAMM_EXPORT_PATH:
+        json_interface.export_json(settings.YAMM_EXPORT_PATH)   
+
+@receiver(post_save, sender=ModDependency)
+def save_json2(sender, **kwargs):
+    if settings.YAMM_EXPORT_PATH:
+        json_interface.export_json(settings.YAMM_EXPORT_PATH)
     
 @receiver(post_save, sender=Mod)
 def save_json(sender, **kwargs):
+    if settings.YAMM_EXPORT_PATH:
+        json_interface.export_json(settings.YAMM_EXPORT_PATH)
+
+@receiver(post_save, sender=ModCategory)
+def save_json4(sender, **kwargs):
     if settings.YAMM_EXPORT_PATH:
         json_interface.export_json(settings.YAMM_EXPORT_PATH)

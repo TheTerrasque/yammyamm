@@ -28,7 +28,7 @@ def import_json(jsonfile, basefiledir):
         
         for dep in mod.get("depends", []):
             M.ModDependency.objects.create(mod=modentry, relation=0, dependency=dep)
-        for dep in mod.get("provides", []) + [mod["name"]]:
+        for dep in mod.get("provides", []):
             M.ModDependency.objects.create(mod=modentry, relation=1, dependency=dep)
         for dep in mod.get("conflicts", []):
             M.ModDependency.objects.create(mod=modentry, relation=2, dependency=dep)
@@ -49,7 +49,7 @@ def export_json(target):
         m = {
             "name": mod.name,
             "version": mod.version,
-            "filename": mod.archive.name.lstrip("files/"),
+            "filename": mod.archive.name[len("files/"):],
         }
         for key in ["category", "description", "filehash", "filesize", "homepage", "author"]:
             if getattr(mod, key):
@@ -67,5 +67,5 @@ def export_json(target):
     if settings.YAMM_VERBOSE_JSON:
         json.dump(d, outfile, indent=4)
     else:
-        json.dump(d, outfile, indent=4)
+        json.dump(d, outfile)
     
