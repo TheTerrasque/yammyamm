@@ -5,11 +5,11 @@ from django.conf import settings
 
 #>>> from yammies import json_interface as ym; ym.import_json("/home/terra/old/public/yamm/mods.json", "/home/terra/old/public/yamm/files/")
 
-def import_json(jsonfile, basefiledir):
+def import_json(jsonfile, basefiledir, service):
     data = json.load(open(jsonfile))
     for mod in data["mods"]:
         print "Importing %s" % mod["name"]
-        modentry = M.Mod(name=mod["name"])
+        modentry = M.Mod(name=mod["name"], service=service)
         modentry.version = mod["version"]
         modentry.description = mod.get("description", "")
         modentry.homepage = mod.get("homepage", "")
@@ -37,20 +37,24 @@ def import_json(jsonfile, basefiledir):
 
 
 # from yammies import json_interface as j; j.export_json("/home/terra/old/public/yamm/export.json")        
-def export_json(target):
+def export_json(service):
     d = {
         "mods": [],
-        "service": settings.YAMM_SERVICE.copy()
+        "service": {
+            "name": service.name,
+        }
     }
     
-    d["service"]["filelocations"] = [x.url for x in M.HostMirror.objects.filter(active=True)]
+    d["service"]["filelocations"] = [x.url for x in service.hostmirror_set.filter(active=True)]
     
-    for mod in M.Mod.objects.filter(active=True):
+    for mod in service.mod_set.filter(active=True):
         m = {
             "name": mod.name,
             "version": mod.version,
-            "filename": mod.archive.name[len("files/"):],
         }
+        if mod.archive:
+            m["filename"] = mod.archive.name[len("files/"):]
+            
         for key in ["category", "description", "filehash", "filesize", "homepage", "author"]:
             if getattr(mod, key):
                 m[key] = unicode(getattr(mod, key))
@@ -62,10 +66,9 @@ def export_json(target):
                 
         d["mods"].append(m)
         
-    outfile = open(target, "w")
-    
-    if settings.YAMM_VERBOSE_JSON:
-        json.dump(d, outfile, indent=4)
-    else:
-        json.dump(d, outfile)
+    with open(service.jsonpath, "w") as outfile:
+        if service.verbose_json:
+            json.dump(d, outfile, indent=4)
+        else:
+            json.dump(d, outfile)
     

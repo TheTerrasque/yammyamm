@@ -15,7 +15,21 @@ class ModCategory(models.Model):
     def __unicode__(self):
         return self.name
 
+class JsonService(models.Model):
+    jsonpath = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
+    verbose_json = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)
+    
+    def __unicode__(self):
+        return self.name
+
+    def export(self):
+        if self.active:
+            json_interface.export_json(self)
+
 class HostMirror(models.Model):
+    service = models.ForeignKey(JsonService)
     url = models.CharField(max_length=200)
     active = models.BooleanField(default=True)
 
@@ -23,10 +37,13 @@ class HostMirror(models.Model):
         return self.url
 
 class Mod(models.Model):
+    service = models.ForeignKey(JsonService)
+    
     name = models.CharField(db_index=True, max_length=30)
     version = models.CharField(max_length=30)
     category = models.ForeignKey(ModCategory)
-    archive = models.FileField(upload_to="files")
+    
+    archive = models.FileField(upload_to="files", blank=True, null=True)
     
     updated = models.DateTimeField(auto_now=True)
     added = models.DateTimeField(auto_now_add=True)
@@ -72,20 +89,21 @@ class ModDependency(models.Model):
  
 @receiver(post_save, sender=HostMirror)
 def save_json3(sender, **kwargs):
-    if settings.YAMM_EXPORT_PATH:
-        json_interface.export_json(settings.YAMM_EXPORT_PATH)   
+    mirror = kwargs["instance"]
+    mirror.service.export()
 
 @receiver(post_save, sender=ModDependency)
 def save_json2(sender, **kwargs):
-    if settings.YAMM_EXPORT_PATH:
-        json_interface.export_json(settings.YAMM_EXPORT_PATH)
+    mod = kwargs["instance"].mod
+    mod.service.export()
     
 @receiver(post_save, sender=Mod)
 def save_json(sender, **kwargs):
-    if settings.YAMM_EXPORT_PATH:
-        json_interface.export_json(settings.YAMM_EXPORT_PATH)
+    mod = kwargs["instance"]
+    mod.service.export()
 
 @receiver(post_save, sender=ModCategory)
 def save_json4(sender, **kwargs):
-    if settings.YAMM_EXPORT_PATH:
-        json_interface.export_json(settings.YAMM_EXPORT_PATH)
+    pass
+    #mod = kwargs["instance"]
+    #mod.service.export()
