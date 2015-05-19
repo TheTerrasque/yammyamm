@@ -4,7 +4,7 @@ from django.conf import settings
 # Create your models here.
 import os.path
 
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 import json_interface
@@ -57,15 +57,22 @@ class Mod(models.Model):
     
     active = models.BooleanField(default=True)
     
+    class Meta:
+        ordering = ["name"]
+    
     def __unicode__(self):
         return self.name
     
     def update_file_data(self):
-        root = settings.MEDIA_ROOT or settings.BASE_DIR
-        
-        data = create_filedata.filedata(os.path.join(root, self.archive.name))
-        self.filehash = data["filehash"]
-        self.filesize = data["filesize"]
+        if self.archive:
+            root = settings.MEDIA_ROOT or settings.BASE_DIR
+            
+            data = create_filedata.filedata(os.path.join(root, self.archive.name))
+            self.filehash = data["filehash"]
+            self.filesize = data["filesize"]
+        else:
+            self.filehash = None
+            self.filesize = None
     
     def save(self, *args, **kwargs):
         super(Mod, self).save(*args, **kwargs)
@@ -96,6 +103,13 @@ def save_json3(sender, **kwargs):
 def save_json2(sender, **kwargs):
     mod = kwargs["instance"].mod
     mod.service.export()
+
+@receiver(pre_save, sender=Mod)
+def update_dependency_names(sender, instance, **kwargs):
+    if instance.id: # without an instance id, this is a create action                                                                                                                                            
+        old = sender.objects.get(pk=instance.id)
+        if old.name != instance.name:
+            ModDependency.objects.filter(dependency=old.name).update(dependency=instance.name)
     
 @receiver(post_save, sender=Mod)
 def save_json(sender, **kwargs):
