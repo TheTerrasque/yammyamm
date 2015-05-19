@@ -72,7 +72,7 @@ class Mod(models.Model):
             self.filesize = data["filesize"]
         else:
             self.filehash = None
-            self.filesize = None
+            self.filesize = 0
     
     def save(self, *args, **kwargs):
         super(Mod, self).save(*args, **kwargs)
