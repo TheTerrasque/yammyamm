@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}YAMM Mod Service{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <div id="header">YAMM Mod services - <a href="/admin">Admin mods</a></div>
+    <div id="main">
+        {% block main %}
+        {% endblock %}
+    </div>
+  </body>
+</html>
