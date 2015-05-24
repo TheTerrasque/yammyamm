@@ -4,10 +4,17 @@ from django.conf import settings
 # Create your models here.
 import os.path
 
+from io import BytesIO
+
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 import json_interface
+
+try:
+    from makeTorrent import makeTorrent as mT
+except ImportError:
+    mT = None
 
 class ModCategory(models.Model):
     name = models.CharField(max_length=30)
@@ -20,6 +27,9 @@ class JsonService(models.Model):
     name = models.CharField(max_length=200)
     verbose_json = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
+    
+    torrent_enable = models.BooleanField(default=False)
+    torrent_announce = models.CharField(max_length=200, blank=True, null=True)
     
     def __unicode__(self):
         return self.name
@@ -57,17 +67,31 @@ class Mod(models.Model):
     
     active = models.BooleanField(default=True)
     
+    torrent_file = models.FileField(upload_to="torrents", blank=True, null=True)
+    torrent_magnet = models.TextField(blank=True)
+    
     class Meta:
         ordering = ["name"]
     
     def __unicode__(self):
         return self.name
     
+    def create_torrent(self):
+        if mT and self.service.torrent_enable and self.service.torrent_announce and self.archive:
+            torrent = mT(announce=str(self.service.torrent_announce))
+            torrent.single_file(str(self.get_archive_path()))
+            cfile = BytesIO(torrent.getBencoded())
+            content = json_interface.File(cfile)
+            self.torrent_file.save(self.name + ".torrent", content, save=False)
+            self.torrent_magnet = torrent.info_hash()
+            
+    def get_archive_path(self):
+        root = settings.MEDIA_ROOT or settings.BASE_DIR
+        return os.path.join(root, self.archive.name)
+    
     def update_file_data(self):
         if self.archive:
-            root = settings.MEDIA_ROOT or settings.BASE_DIR
-            
-            data = create_filedata.filedata(os.path.join(root, self.archive.name))
+            data = create_filedata.filedata(self.get_archive_path())
             self.filehash = data["filehash"]
             self.filesize = data["filesize"]
         else:

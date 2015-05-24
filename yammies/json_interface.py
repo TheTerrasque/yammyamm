@@ -1,7 +1,6 @@
 import json
 from django.core.files import File
 import models as M# Mod, ModCategory, ModDependency, HostMirror
-from django.conf import settings
 
 #>>> from yammies import json_interface as ym; ym.import_json("/home/terra/old/public/yamm/mods.json", "/home/terra/old/public/yamm/files/")
 
