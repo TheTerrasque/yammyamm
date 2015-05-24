@@ -1,3 +1,4 @@
 Django==1.8.1
 django-ajax-selects==1.3.6
-makeTorrent==0.12
+#makeTorrent==0.12
+git+https://github.com/TheTerrasque/makeTorrent.git
