@@ -109,10 +109,17 @@ YAMM_SERVICE = {
 YAMM_VERBOSE_JSON = True
 YAMM_EXPORT_PATH = "modules.json"
 
+HOSTNAME = "http://127.0.0.1:8000"
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, "files", "static")
 STATIC_URL = '/static/'
+
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "files", "media")
+MEDIA_URL = "/media/"
 
 try:
     from settings_local import *

@@ -4,17 +4,28 @@ from django.conf import settings
 # Create your models here.
 import os.path
 
-from io import BytesIO
-
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 import json_interface
 
+from django.core.files.storage import FileSystemStorage
+from django.core.files.base import ContentFile
+
 try:
     from makeTorrent import makeTorrent as mT
 except ImportError:
     mT = None
+
+class OverwriteStorage(FileSystemStorage):
+    '''
+    Delete old file before saving new
+    '''
+    def get_available_name(self, name):
+        if self.exists(name):
+            os.remove(os.path.join(settings.MEDIA_ROOT, name))
+        return name
+
 
 class ModCategory(models.Model):
     name = models.CharField(max_length=30)
@@ -22,10 +33,16 @@ class ModCategory(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class JsonService(models.Model):
-    jsonpath = models.CharField(max_length=200)
     name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    
+    json_name = models.SlugField(unique=True)
     verbose_json = models.BooleanField(default=True)
+    
+    json_file = models.FileField(upload_to="service", storage=OverwriteStorage(), blank=True, null=True)
+    
     active = models.BooleanField(default=True)
     
     torrent_enable = models.BooleanField(default=False)
@@ -38,6 +55,15 @@ class JsonService(models.Model):
         if self.active:
             json_interface.export_json(self)
 
+    def save_json(self, data):
+        self.json_file.save(self.json_name + ".json", ContentFile(data))
+
+    def get_yamm_link(self):
+        if self.json_file:
+            return "yamm:service:" + settings.HOSTNAME + self.json_file.url
+        return ""
+
+
 class HostMirror(models.Model):
     service = models.ForeignKey(JsonService)
     url = models.CharField(max_length=200)
@@ -46,6 +72,7 @@ class HostMirror(models.Model):
     def __unicode__(self):
         return self.url
 
+
 class Mod(models.Model):
     service = models.ForeignKey(JsonService)
     
@@ -53,12 +80,13 @@ class Mod(models.Model):
     version = models.CharField(max_length=30)
     category = models.ForeignKey(ModCategory)
     
-    archive = models.FileField(upload_to="files", blank=True, null=True)
+    archive = models.FileField(upload_to="mods", blank=True, null=True, storage=OverwriteStorage())
     
     updated = models.DateTimeField(auto_now=True)
     added = models.DateTimeField(auto_now_add=True)
     
     description = models.TextField(blank=True)
+    long_description = models.TextField(blank=True)
     
     filesize = models.IntegerField(default=0)
     filehash = models.CharField(blank=True, null=True, max_length=90)
@@ -67,7 +95,7 @@ class Mod(models.Model):
     
     active = models.BooleanField(default=True)
     
-    torrent_file = models.FileField(upload_to="torrents", blank=True, null=True)
+    torrent_file = models.FileField(upload_to="torrents", blank=True, null=True, storage=OverwriteStorage())
     torrent_magnet = models.TextField(blank=True)
     
     class Meta:
@@ -76,13 +104,15 @@ class Mod(models.Model):
     def __unicode__(self):
         return self.name
     
+    def get_yamm_link(self):
+        return "yamm:mod:" + self.name
+    
     def create_torrent(self):
         if mT and self.service.torrent_enable and self.service.torrent_announce and self.archive:
             torrent = mT(announce=str(self.service.torrent_announce))
             torrent.single_file(str(self.get_archive_path()))
-            cfile = BytesIO(torrent.getBencoded())
-            content = json_interface.File(cfile)
-            self.torrent_file.save(self.name + ".torrent", content, save=False)
+            content = ContentFile(torrent.getBencoded())
+            self.torrent_file.save(self.name + "_" + self.version + ".torrent", content, save=False)
             self.torrent_magnet = torrent.info_hash()
             
     def get_archive_path(self):

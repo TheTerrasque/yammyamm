@@ -15,15 +15,12 @@ def import_json(jsonfile, basefiledir, service):
         modentry.author = mod.get("author", "")
         cat, created = M.ModCategory.objects.get_or_create(name=mod.get("category", "none"))
         modentry.category = cat
+        
         mf = basefiledir + mod["filename"]
         of = File(open(mf))
+        
         modentry.archive.save(mod["filename"], of, save=False)
         modentry.save()
-        
-        #modentry.update_file_data()
-        #modentry.save()
-        
-        #print modentry.archive.name
         
         for dep in mod.get("depends", []):
             M.ModDependency.objects.create(mod=modentry, relation=0, dependency=dep)
@@ -65,9 +62,10 @@ def export_json(service):
                 
         d["mods"].append(m)
         
-    with open(service.jsonpath, "w") as outfile:
-        if service.verbose_json:
-            json.dump(d, outfile, indent=4)
-        else:
-            json.dump(d, outfile)
+
+    if service.verbose_json:
+        j = json.dumps(d, indent=4)
+    else:
+        j = json.dumps(d)
+    service.save_json(j)
     

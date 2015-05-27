@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <table class="list">
+    {% for m in object_list%}
+        <tr>
+            <td>
+                {{ m }}
+            </td>
+            <td>
+                {{ m.version }}
+            </td>
+            <td>
+                {{ m.service }}
+            </td>
+            <td>
+                {{ m.description }}
+            </td>
+            <td>
+                {{ m.author }}
+            </td>
+            <td>
+                {{ m.filesize|filesizeformat }}
+            </td>
+            <td>
+               <a href="{{m.homepage}}">{{m.homepage}}</a>
+            </td>
+            <td>
+                <a href="{{ m.get_yamm_link }}">Open in YAMM</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endblock %}

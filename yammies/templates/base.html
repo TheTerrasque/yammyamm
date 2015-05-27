@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/static/style.css">
   </head>
   <body>
-    <div id="header">YAMM Mod services - <a href="/admin">Admin mods</a></div>
+    <div id="header">YAMM Mod services | <a href="{% url "mod:servicelist" %}">Service list</a> - <a href="{% url "mod:modlist" %}">Mod list</a> | <a href="/admin">Admin</a> </div>
     <div id="main">
         {% block main %}
         {% endblock %}

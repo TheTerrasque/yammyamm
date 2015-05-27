@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <table class="list">
+    {% for s in object_list%}
+        <tr>
+            <td>
+                {{ s }}
+            </td>
+            <td>
+                {{ s.mod_set.count }} mods
+            </td>
+            <td>
+                {{ s.description }}
+            </td>
+            <td>
+                <a href="{{ s.get_yamm_link }}">Open in YAMM</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endblock %}

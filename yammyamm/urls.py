@@ -18,9 +18,12 @@ from django.contrib import admin
 from django.views.generic.base import RedirectView
 from ajax_select import urls as ajax_select_urls
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     url(r'^admin/lookups/', include(ajax_select_urls)),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^mods/', include("yammies.urls")),
+    url(r'^mods/', include("yammies.urls", namespace='mod')),
     url(r'^$', RedirectView.as_view(url='/mods/', permanent=False))
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
