@@ -147,6 +147,12 @@ class ModDependency(models.Model):
     
     def __unicode__(self):
         return "<%s> %s %s" % (self.mod, self.get_relation_display(), self.dependency)
+
+
+@receiver(post_save, sender=JsonService)
+def save_json3(sender, **kwargs):
+    service = kwargs["instance"]
+    service.export()
  
 @receiver(post_save, sender=HostMirror)
 def save_json3(sender, **kwargs):

@@ -15,11 +15,11 @@ def import_json(jsonfile, basefiledir, service):
         modentry.author = mod.get("author", "")
         cat, created = M.ModCategory.objects.get_or_create(name=mod.get("category", "none"))
         modentry.category = cat
+        if "filename" in mod:
+          mf = basefiledir + mod["filename"]
+          of = File(open(mf))
         
-        mf = basefiledir + mod["filename"]
-        of = File(open(mf))
-        
-        modentry.archive.save(mod["filename"], of, save=False)
+          modentry.archive.save(mod["filename"], of, save=False)
         modentry.save()
         
         for dep in mod.get("depends", []):

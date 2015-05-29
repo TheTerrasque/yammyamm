@@ -1,9 +1,9 @@
 *.sqlite3
 *.pyc
 files/*
-local_settings.py
-yammies/settings_local.py
+yammyamm/settings_local.py
 env/
 *.komodoproject
 *.json
 *.torrent
+uwsgi.*
