@@ -51,9 +51,13 @@ def export_json(service):
         if mod.archive:
             m["filename"] = mod.archive.name[len("files/"):]
             
-        for key in ["category", "description", "filehash", "filesize", "homepage", "author"]:
-            if getattr(mod, key):
-                m[key] = unicode(getattr(mod, key))
+        for key in ["category", "description", "filehash", "filesize", "homepage", "author", ("torrent_file", "torrent"), ("torrent_magnet", "magnet")]:
+            if isinstance(key, basestring):
+                k = v = key
+            else:
+                k, v = key
+            if getattr(mod, k):
+                m[v] = unicode(getattr(mod, k))
                 
         for depnr, deptype in enumerate(["depends", "provides", "conflicts", "recommends"]):
             entries = [x.dependency for x in M.ModDependency.objects.filter(mod=mod, relation=depnr) if x.dependency != mod.name]
