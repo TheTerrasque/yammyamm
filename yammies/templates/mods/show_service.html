@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div id="serviceinfo">
+        <h2>{{ object.name }}</h2>
+        <pre>
+            {{ object.description|linebreaksbr}}
+        </pre>
+    </div>
+    
+    <div id="mods">
+        <table class="list">
+            <thead>
+                <tr>
+                    <td></td>
+                    <td>Name</td>
+                    <td>Version</td>
+                    <td>Service</td>
+                    <td>Author</td>
+                    <td>Size</td>
+                    <td>Category</td>
+                </tr>
+            </thead>
+            <tbody>
+            {% for m in object.get_mods %}
+                <tr>
+                    <td>
+                        <a href="{{ m.get_yamm_link }}">[Y]</a>
+                    </td>
+                    <td>
+                        <a href="{{ m.get_absolute_url }}">{{ m }}</a>
+                    </td>
+                    <td>
+                        {{ m.version }}
+                    </td>
+                    <td>
+                        {{ m.service }}
+                    </td>
+                    <td>
+                        {{ m.author }}
+                    </td>
+                    <td>
+                        {{ m.filesize|filesizeformat }}
+                    </td>
+                    <td>
+                        {{ m.category }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {% if m.homepage %}<a href="{{m.homepage}}">[H]</a>{% endif %}
+                    </td>
+                    <td colspan=6>
+                        {{ m.description }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

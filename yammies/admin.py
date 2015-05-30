@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Mod, ModCategory, ModDependency, HostMirror, JsonService
+from .models import Mod, ModCategory, ModDependency, HostMirror, JsonService, JsonServiceSuggestion
 
 from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdminTabularInline
@@ -20,7 +20,15 @@ class ModAdmin(admin.ModelAdmin):
     inlines = [ModDependencyInline]
     list_filter = ['category', "added"]
 
+class JsonServiceAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None,            {'fields': ['name', "description", "active"]}),
+        ('JSON data',     {'fields': ["json_name", "verbose_json", "json_file"]}),
+        ('Torrent creation',  {'fields': ["torrent_enable", "torrent_announce", "torrent_link", "torrent_minimum_bytes", "torrent_webseeds"]})
+    ]  
+    
 admin.site.register(Mod, ModAdmin)
 admin.site.register(ModCategory)
 admin.site.register(HostMirror)
-admin.site.register(JsonService)
+admin.site.register(JsonServiceSuggestion)
+admin.site.register(JsonService, JsonServiceAdmin)

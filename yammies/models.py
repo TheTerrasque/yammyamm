@@ -3,14 +3,14 @@ import create_filedata
 from django.conf import settings
 # Create your models here.
 import os.path
-
+import json
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
-import json_interface
-
 from django.core.files.storage import FileSystemStorage
 from django.core.files.base import ContentFile
+
+from django.core.urlresolvers import reverse
 
 try:
     from makeTorrent import makeTorrent as mT
@@ -37,34 +37,72 @@ class ModCategory(models.Model):
 class JsonService(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    
+    active = models.BooleanField(default=True)
+        
     json_name = models.SlugField(unique=True)
     verbose_json = models.BooleanField(default=True)
-    
     json_file = models.FileField(upload_to="service", storage=OverwriteStorage(), blank=True, null=True)
-    
-    active = models.BooleanField(default=True)
     
     torrent_enable = models.BooleanField(default=False)
     torrent_announce = models.CharField(max_length=200, blank=True, null=True)
+    TC = [
+        ("T", "Torrent file"),
+        ("M", "Magnet link (infohash)")
+    ]
+    torrent_link = models.CharField(max_length=2, choices = TC, blank=True, null=True)
+    torrent_minimum_bytes = models.PositiveIntegerField(default=1024*1024)
+    torrent_webseeds = models.BooleanField(default=True)
     
     def __unicode__(self):
         return self.name
 
+    def get_mirrors(self):
+        return [x.url for x in self.hostmirror_set.filter(active=True)]
+
+    def get_absolute_url(self):
+        return reverse('mod:servicedetail', args=[str(self.id)])
+    
+    def get_mods(self):
+        return self.mod_set.filter(active=True)
+    
     def export(self):
         if self.active:
             post_save.disconnect(save_json5, sender=JsonService)
-            json_interface.export_json(self)
+
+            d = {
+                "mods": [],
+                "service": {
+                    "name": self.name,
+                    "filelocations": self.get_mirrors()
+                }
+            }
+            
+            for mod in self.get_mods():  
+                d["mods"].append(mod.create_json_entry())
+                
+            if self.verbose_json:
+                j = json.dumps(d, indent=4)
+            else:
+                j = json.dumps(d)
+            self.save_json(j)
+            
             post_save.connect(save_json5, sender=JsonService)
 
     def save_json(self, data):
         self.json_file.save(self.json_name + ".json", ContentFile(data))
 
+    def get_suggestions(self):
+        return [x.url for x in self.jsonservicesuggestion_set.all()]
+    
     def get_yamm_link(self):
         if self.json_file:
             return "yamm:service:" + settings.HOSTNAME + self.json_file.url
         return ""
 
+
+class JsonServiceSuggestion(models.Model):
+    service = models.ForeignKey(JsonService)
+    url = models.URLField()
 
 class HostMirror(models.Model):
     service = models.ForeignKey(JsonService)
@@ -109,13 +147,56 @@ class Mod(models.Model):
     def get_yamm_link(self):
         return "yamm:mod:" + self.name
     
+    def create_json_entry(self):
+        m = {
+            "name": self.name,
+            "version": self.version,
+        }
+        if self.archive:
+            m["filename"] = self.get_filename()
+            
+        extra = []
+        if self.service.torrent_link == "T":
+            extra = [("torrent_file", "torrent")]
+        if self.service.torrent_link == "M":
+            extra = [("torrent_magnet", "magnet")]
+            
+        for key in ["category", "description", "filehash", "filesize", "homepage", "author"] + extra:
+            if isinstance(key, basestring):
+                k = v = key
+            else:
+                k, v = key
+            if getattr(self, k):
+                m[v] = unicode(getattr(self, k))
+                
+        for depnr, deptype in enumerate(["depends", "provides", "conflicts", "recommends"]):
+            entries = [x.dependency for x in self.get_dependencies().filter(relation=depnr).exclude(dependency=self.name)]
+            #entries = [x.dependency for x in ModDependency.objects.filter(mod=self, relation=depnr) if x.dependency != self.name]
+            if entries:
+                m[deptype] = entries
+        return m
+    
+    def get_dependencies(self):
+        return self.moddependency_set.all()
+    
     def create_torrent(self):
-        if mT and self.service.torrent_enable and self.service.torrent_announce and self.archive:
-            torrent = mT(announce=str(self.service.torrent_announce))
+        if mT and self.service.torrent_enable and self.service.torrent_announce \
+                and self.archive and self.service.torrent_minimum_bytes < self.filesize:
+            
+            S = None
+            if self.service.torrent_webseeds:
+                S = [x + self.get_filename() for x in self.service.get_mirrors()]
+            
+            torrent = mT(announce=str(self.service.torrent_announce), httpseeds=S)
             torrent.single_file(str(self.get_archive_path()))
+            
             content = ContentFile(torrent.getBencoded())
             self.torrent_file.save(self.name + "_" + self.version + ".torrent", content, save=False)
+            
             self.torrent_magnet = torrent.info_hash()
+
+    def get_filename(self):
+        return self.archive.name[len("mods/"):]
             
     def get_archive_path(self):
         root = settings.MEDIA_ROOT or settings.BASE_DIR
@@ -129,6 +210,9 @@ class Mod(models.Model):
         else:
             self.filehash = None
             self.filesize = 0
+    
+    def get_absolute_url(self):
+        return reverse('mod:moddetail', args=[str(self.id)])
     
     def save(self, *args, **kwargs):
         super(Mod, self).save(*args, **kwargs)
@@ -177,9 +261,3 @@ def update_dependency_names(sender, instance, **kwargs):
 def save_json(sender, **kwargs):
     mod = kwargs["instance"]
     mod.service.export()
-
-@receiver(post_save, sender=ModCategory)
-def save_json4(sender, **kwargs):
-    pass
-    #mod = kwargs["instance"]
-    #mod.service.export()

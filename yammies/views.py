@@ -19,3 +19,7 @@ class Mods(ListView):
 class ModDisplay(DetailView):
     queryset = M.Mod.objects.filter(active=True)
     template_name = "mods/show_mod.html"
+
+class ServiceDisplay(DetailView):
+    queryset = M.JsonService.objects.filter(active=True)
+    template_name = "mods/show_service.html"

@@ -32,44 +32,4 @@ def import_json(jsonfile, basefiledir, service):
             M.ModDependency.objects.create(mod=modentry, relation=3, dependency=dep)
 
 
-# from yammies import json_interface as j; j.export_json("/home/terra/old/public/yamm/export.json")        
-def export_json(service):
-    d = {
-        "mods": [],
-        "service": {
-            "name": service.name,
-        }
-    }
-    
-    d["service"]["filelocations"] = [x.url for x in service.hostmirror_set.filter(active=True)]
-    
-    for mod in service.mod_set.filter(active=True):
-        m = {
-            "name": mod.name,
-            "version": mod.version,
-        }
-        if mod.archive:
-            m["filename"] = mod.archive.name[len("files/"):]
-            
-        for key in ["category", "description", "filehash", "filesize", "homepage", "author", ("torrent_file", "torrent"), ("torrent_magnet", "magnet")]:
-            if isinstance(key, basestring):
-                k = v = key
-            else:
-                k, v = key
-            if getattr(mod, k):
-                m[v] = unicode(getattr(mod, k))
-                
-        for depnr, deptype in enumerate(["depends", "provides", "conflicts", "recommends"]):
-            entries = [x.dependency for x in M.ModDependency.objects.filter(mod=mod, relation=depnr) if x.dependency != mod.name]
-            if entries:
-                m[deptype] = entries
-                
-        d["mods"].append(m)
-        
-
-    if service.verbose_json:
-        j = json.dumps(d, indent=4)
-    else:
-        j = json.dumps(d)
-    service.save_json(j)
     
