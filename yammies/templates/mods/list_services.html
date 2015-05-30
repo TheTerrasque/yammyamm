@@ -12,23 +12,22 @@
     
     <div id="services">
         The services we have:
-        <table class="list">
+
         {% for s in object_list%}
-            <tr>
-                <td>
-                    <a href="{{ s.get_absolute_url }}">{{ s }}</a>
-                </td>
-                <td>
-                    {{ s.mod_set.count }} mods
-                </td>
-                <td>
-                    {{ s.description }}
-                </td>
-                <td>
-                    <a href="{{ s.get_yamm_link }}">Open in YAMM</a>
-                </td>                
-            </tr>
+            <div class="boxentry serviceentry">
+                <div class="floater">
+                    <a href="{{ s.get_yamm_link }}" class="yammlink">[Open in YAMM]</a>
+                </div>
+                <div class="header">
+                    <span class="title"><a href="{{ s.get_absolute_url }}">{{ s }}</a></span>
+                </div>
+                <div class="info">
+                    <span>{{ s.description }}</span>
+                </div>
+                <div class="footer">
+                    <span>{{ s.mod_set.count }} mods listed</span>
+                </div>
+            </div>
         {% endfor %}
-        </table>
     </div>
 {% endblock %}

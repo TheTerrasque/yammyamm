@@ -9,53 +9,29 @@
     </div>
     
     <div id="mods">
-        <table class="list">
-            <thead>
-                <tr>
-                    <td></td>
-                    <td>Name</td>
-                    <td>Version</td>
-                    <td>Service</td>
-                    <td>Author</td>
-                    <td>Size</td>
-                    <td>Category</td>
-                </tr>
-            </thead>
-            <tbody>
+
             {% for m in object.get_mods %}
-                <tr>
-                    <td>
-                        <a href="{{ m.get_yamm_link }}">[Y]</a>
-                    </td>
-                    <td>
-                        <a href="{{ m.get_absolute_url }}">{{ m }}</a>
-                    </td>
-                    <td>
-                        {{ m.version }}
-                    </td>
-                    <td>
-                        {{ m.service }}
-                    </td>
-                    <td>
-                        {{ m.author }}
-                    </td>
-                    <td>
-                        {{ m.filesize|filesizeformat }}
-                    </td>
-                    <td>
-                        {{ m.category }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        {% if m.homepage %}<a href="{{m.homepage}}">[H]</a>{% endif %}
-                    </td>
-                    <td colspan=6>
-                        {{ m.description }}
-                    </td>
-                </tr>
+                <div class="modentry boxentry">
+                    <div class="floater">
+                        <div class="yammlink"><a href="{{ m.get_yamm_link }}" >[Open in YAMM]</a></div>
+                        {% if m.homepage %}<span class="homepage"><a href="{{m.homepage}}">[Mod Homepage]</a></span>{% endif %}
+                        
+                    </div>
+                    <div class="header">
+                        <a href="{{ m.get_absolute_url }}">
+                            <span class="title">{{ m }}</span>
+                            <span class="version">{{ m.version }}</span>
+                        </a>
+                        {% if m.author %}<span class="author">by {{ m.author|default:"???" }}.</span>{% endif %}
+                        Category <span class="category">{{ m.category }}</span>
+                        
+                    </div>
+                    <div class="description">{{ m.description }}</div>
+                    <div class="footer">
+                        <span class="updated">Last updated {{ m.updated }}</span>
+                        <span class="filesize">{{ m.filesize|filesizeformat }}</span>
+                    </div>
+                </div>
             {% endfor %}
-            </tbody>
-        </table>
     </div>
 {% endblock %}

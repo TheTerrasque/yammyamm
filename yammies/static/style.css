@@ -46,3 +46,35 @@ a {
     color: #5F0E2D;
 }
 
+.boxentry {
+    border-left: 3px solid #B1D6FF;
+    padding: 4px;
+    margin: 10px 0;
+    border-bottom: 1px solid #B1D6FF;
+    background-color: #EAF4FF;
+}
+.boxentry .header {
+    font-size: 90%;
+}
+
+.boxentry .title {
+    font-size: 133%;
+}
+
+.boxentry .floater {
+    float: right;
+}
+
+.boxentry .description {
+    padding-left: 4px;
+}
+
+#main {
+    max-width: 1000px;
+    margin:auto;
+}
+
+.boxentry .footer {
+    font-size: 80%;
+    font-style: italic;
+}

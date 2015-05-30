@@ -1,19 +1,31 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <h2>{{ object.name }}</h2>
-    <div id="modversion">Version {{ object.version }}</div>
-    <pre>
-        {{ object.description|linebreaksbr}}
-    </pre>
-    <div>Part of the <a href="{{ object.service.get_absolute_url }}">{{ object.service.name }}</a> service</div>
-    <div id="dlbox">
-        <div><a href="{{ object.get_yamm_link }}">Open in YAMM</a></div>
-        {% if object.archive %}<div><a href="{{ object.archive.url }}">Download directly ({{ object.filesize|filesizeformat }})</a></div>{% endif %}
-        {% if object.torrent_file %}<div><a href="{{ object.torrent_file.url }}">Torrent</a></div>{% endif %}
-    </div>
-    <div id="infobox">
-        {% if object.author %}<div>Author: {{ object.author}}</div>{% endif %}
-        {% if object.homepage %}<div>Homepage: {{ object.homepage}}</div>{% endif %}
+    <div class="boxentry" id="mod">
+        <div class="floater">
+            <div class="yammlink"><a href="{{ object.get_yamm_link }}" >[Open in YAMM]</a></div>
+            {% if object.homepage %}<span class="homepage"><a href="{{object.homepage}}">[Mod Homepage]</a></span>{% endif %}
+            
+        </div>
+        <div class="header">
+            <span class="title">{{ object.name }}</span>
+            <span id="modversion">version {{ object.version }}</span>
+            {% if m.author %}<span class="author">by {{ m.author|default:"???" }}.</span>{% endif %}
+        </div>
+        
+    
+        <div class="description">
+            {{ object.description|linebreaksbr}}
+        </div>
+        
+        <div class="dlbox">
+            {% if object.torrent_file %}<div><a href="{{ object.torrent_file.url }}">Download via BitTorrent</a></div>{% endif %}
+            {% if object.archive %}<div><a href="{{ object.archive.url }}">Download directly ({{ object.filesize|filesizeformat }})</a></div>{% endif %}
+        </div>
+        
+        <div class="footer">
+            <div>Part of the <a href="{{ object.service.get_absolute_url }}">{{ object.service.name }}</a> service</div>
+        </div>
+        
     </div>
 {% endblock %}
