@@ -73,9 +73,12 @@ class JsonService(models.Model):
                 "mods": [],
                 "service": {
                     "name": self.name,
-                    "filelocations": self.get_mirrors()
+                    "filelocations": self.get_mirrors(),
                 }
             }
+            
+            if self.get_suggestions():
+                d["service"]["recommend"] = self.get_suggestions()
             
             for mod in self.get_mods():  
                 d["mods"].append(mod.create_json_entry())
@@ -94,11 +97,13 @@ class JsonService(models.Model):
     def get_suggestions(self):
         return [x.url for x in self.jsonservicesuggestion_set.all()]
     
+    def get_json_url(self):
+        return self.json_file and settings.HOSTNAME + self.json_file.url
+    
     def get_yamm_link(self):
         if self.json_file:
-            return "yamm:service:" + settings.HOSTNAME + self.json_file.url
+            return "yamm:service:" + self.get_json_url()
         return ""
-
 
 class JsonServiceSuggestion(models.Model):
     service = models.ForeignKey(JsonService)
@@ -111,7 +116,6 @@ class HostMirror(models.Model):
 
     def __unicode__(self):
         return self.url
-
 
 class Mod(models.Model):
     service = models.ForeignKey(JsonService)
@@ -145,7 +149,14 @@ class Mod(models.Model):
         return self.name
     
     def get_yamm_link(self):
-        return "yamm:mod:" + self.name
+        link = "yamm:"
+        
+        service = self.service.get_json_url()
+        if service:
+            link = link + "service:%s|" % service
+            
+        link = link + "mod:%s" % self.name
+        return link
     
     def create_json_entry(self):
         m = {
