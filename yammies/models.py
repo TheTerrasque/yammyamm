@@ -53,7 +53,9 @@ class JsonService(models.Model):
 
     def export(self):
         if self.active:
+            post_save.disconnect(save_json5, sender=JsonService)
             json_interface.export_json(self)
+            post_save.connect(save_json5, sender=JsonService)
 
     def save_json(self, data):
         self.json_file.save(self.json_name + ".json", ContentFile(data))
@@ -150,7 +152,7 @@ class ModDependency(models.Model):
 
 
 @receiver(post_save, sender=JsonService)
-def save_json3(sender, **kwargs):
+def save_json5(sender, **kwargs):
     service = kwargs["instance"]
     service.export()
  

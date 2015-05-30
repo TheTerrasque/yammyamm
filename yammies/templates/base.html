@@ -1,12 +1,27 @@
-<!DOCTYPE html>
+{% load static from staticfiles %}<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <title>{% block title %}YAMM Mod Service{% endblock %}</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
   </head>
   <body>
-    <div id="header">YAMM Mod services | <a href="{% url "mod:servicelist" %}">Service list</a> - <a href="{% url "mod:modlist" %}">Mod list</a> | <a href="/admin">Admin</a> </div>
+    <div id="header">
+      <ul id="nav">
+        <li>
+          <a href="/">YAMM</a>
+        </li>
+        <li>
+          <a href="{% url "mod:modlist" %}">Mod list</a>
+        </li>
+        <li>
+          <a href="{% url "mod:servicelist" %}">Service list</a>
+        </li>        
+        <li>
+          <a href="/admin">Admin</a>
+        </li>
+      </ul>
+    </div>
     <div id="main">
         {% block main %}
         {% endblock %}

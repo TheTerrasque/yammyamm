@@ -3,7 +3,7 @@ from . import models as M
 # Create your views here.
 
 from django.views.generic import TemplateView
-from django.views.generic.list import ListView
+from django.views.generic import ListView, DetailView
 
 class Home(TemplateView):
     template_name = "mods/index.html"
@@ -15,3 +15,7 @@ class Services(ListView):
 class Mods(ListView):
     queryset = M.Mod.objects.filter(active=True)
     template_name = "mods/list_mods.html"
+    
+class ModDisplay(DetailView):
+    queryset = M.Mod.objects.filter(active=True)
+    template_name = "mods/show_mod.html"

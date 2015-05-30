@@ -2,33 +2,48 @@
 
 {% block main %}
     <table class="list">
-    {% for m in object_list%}
-        <tr>
-            <td>
-                {{ m }}
-            </td>
-            <td>
-                {{ m.version }}
-            </td>
-            <td>
-                {{ m.service }}
-            </td>
-            <td>
-                {{ m.description }}
-            </td>
-            <td>
-                {{ m.author }}
-            </td>
-            <td>
-                {{ m.filesize|filesizeformat }}
-            </td>
-            <td>
-               <a href="{{m.homepage}}">{{m.homepage}}</a>
-            </td>
-            <td>
-                <a href="{{ m.get_yamm_link }}">Open in YAMM</a>
-            </td>
-        </tr>
-    {% endfor %}
+        <thead>
+            <tr>
+                <td></td>
+                <td>Name</td>
+                <td>Version</td>
+                <td>Service</td>
+                <td>Description</td>
+                <td>Author</td>
+                <td>Size</td>
+                <td>Category</td>
+            </tr>
+        </thead>
+        <tbody>
+        {% for m in object_list%}
+            <tr>
+                <td>
+                    <a href="{{ m.get_yamm_link }}">[Y]</a>
+                    {% if m.homepage %}<a href="{{m.homepage}}">[H]</a>{% endif %}
+                </td>
+                <td>
+                    {{ m }}
+                </td>
+                <td>
+                    {{ m.version }}
+                </td>
+                <td>
+                    {{ m.service }}
+                </td>
+                <td>
+                    {{ m.description }}
+                </td>
+                <td>
+                    {{ m.author }}
+                </td>
+                <td>
+                    {{ m.filesize|filesizeformat }}
+                </td>
+                <td>
+                    {{ m.category }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
     </table>
 {% endblock %}
