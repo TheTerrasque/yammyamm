@@ -1,0 +1,48 @@
+* {
+    padding:0;
+    margin:0;
+}
+
+#main,#header {
+    padding: 10px;
+}
+
+#header {
+    border-bottom: 1px solid #7E7E7E;
+    background-color: #eee;
+}
+
+table.list {
+    border-collapse: collapse;
+}
+
+table.list thead td {
+    text-align: center;
+    padding: 2px;
+}
+
+table.list tbody td {
+    border: 1px solid #ddd;
+    padding: 2px;
+}
+
+#nav {
+    display: inline;
+    background-color: #B3B1AF;
+}
+#nav li {
+    display: inline;
+    list-style-type: none; 
+}
+#nav a {
+    padding: 4px;
+}
+#nav a:hover {
+    background-color: #FFF4D4;
+}
+
+a {
+    text-decoration: none;
+    color: #5F0E2D;
+}
+
