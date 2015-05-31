@@ -18,7 +18,7 @@ class ModAdmin(admin.ModelAdmin):
         ('Torrent data',  {'fields': ["torrent_file", "torrent_magnet"]})
     ]
     inlines = [ModDependencyInline]
-    list_filter = ['category', "added"]
+    list_filter = ['category', "added", "service"]
 
 class JsonServiceAdmin(admin.ModelAdmin):
     fieldsets = [
