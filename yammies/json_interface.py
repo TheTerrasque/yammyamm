@@ -18,7 +18,6 @@ def import_json(jsonfile, basefiledir, service):
         if "filename" in mod:
           mf = basefiledir + mod["filename"]
           of = File(open(mf))
-        
           modentry.archive.save(mod["filename"], of, save=False)
         modentry.save()
         

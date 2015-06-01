@@ -12,6 +12,8 @@ from django.core.files.base import ContentFile
 
 from django.core.urlresolvers import reverse
 
+from django.core.files import File
+
 try:
     from makeTorrent import makeTorrent as mT
 except ImportError:
@@ -206,6 +208,12 @@ class Mod(models.Model):
             
             self.torrent_magnet = torrent.info_hash()
 
+    def import_file(self, filepath, filename=None):
+        of = File(open(filepath, "rb"))
+        if not filename:
+            filename = os.path.basename(filepath)
+        self.archive.save(filename, of, save=False)
+    
     def get_filename(self):
         return self.archive.name[len("mods/"):]
             
