@@ -83,3 +83,7 @@ a {
     font-size: 80%;
     font-style: italic;
 }
+
+.depname {
+    padding: 5px;
+}

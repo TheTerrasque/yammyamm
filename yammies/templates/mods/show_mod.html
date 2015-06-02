@@ -34,9 +34,9 @@
                 <div class="header">
                     <span class="title">{{ e.name }}</span>
                 </div>
-                <div>
+                <div class="depslist">
                     {% for mod in e.mods %}
-                        <span class="depname">{{ mod.relation }}</span>
+                        <span class="depname">{{ mod.dependency }}</span>
                     {% endfor %}
                 </div>
             </div>
