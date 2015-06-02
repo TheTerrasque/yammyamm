@@ -28,4 +28,18 @@
         </div>
         
     </div>
+    <div id="deps">
+        {% for e in object.get_dependencies_detailed %}
+            <div class="boxentry">
+                <div class="header">
+                    <span class="title">{{ e.name }}</span>
+                </div>
+                <div>
+                    {% for mod in e.mods %}
+                        <span class="depname">{{ mod.relation }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

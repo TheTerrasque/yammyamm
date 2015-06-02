@@ -111,6 +111,10 @@ class JsonServiceSuggestion(models.Model):
     service = models.ForeignKey(JsonService)
     url = models.URLField()
 
+    def __unicode__(self):
+        return u"Service suggestion for %s" % self.service
+    
+
 class HostMirror(models.Model):
     service = models.ForeignKey(JsonService)
     url = models.CharField(max_length=200)
@@ -238,6 +242,19 @@ class Mod(models.Model):
         self.update_file_data()
         super(Mod, self).save(*args, **kwargs)
     
+    def get_dependencies_detailed(self):
+        D = []
+        for k, v in DEPENDENCY:
+            deps = self.moddependency_set.filter(relation=k)
+            if deps:
+                d = {
+                    "name": v,
+                    "mods": deps
+                }
+                D.append(d)
+        return D
+            
+    
 DEPENDENCY = [
     (0, "Requires"),
     (1, "Provides"),
@@ -252,6 +269,11 @@ class ModDependency(models.Model):
     
     def __unicode__(self):
         return "<%s> %s %s" % (self.mod, self.get_relation_display(), self.dependency)
+
+    def get_modentry(self):
+        r = Mod.objects.filter(name=self.dependency)
+        if r:
+            return r[0]
 
 
 @receiver(post_save, sender=JsonService)
