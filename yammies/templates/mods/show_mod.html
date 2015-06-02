@@ -10,7 +10,7 @@
         <div class="header">
             <span class="title">{{ object.name }}</span>
             <span id="modversion">version {{ object.version }}</span>
-            {% if object.author %}<span class="author">by {{ m.author|default:"???" }}.</span>{% endif %}
+            {% if object.author %}<span class="author">by {{ object.author|default:"???" }}.</span>{% endif %}
         </div>
         
     
