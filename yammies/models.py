@@ -67,6 +67,9 @@ class JsonService(models.Model):
     def get_mods(self):
         return self.mod_set.filter(active=True)
     
+    def get_announce(self):
+        return str(self.torrent_announce)
+    
     def export(self):
         if self.active:
             post_save.disconnect(save_json5, sender=JsonService)
@@ -202,9 +205,9 @@ class Mod(models.Model):
             
             S = None
             if self.service.torrent_webseeds:
-                S = [x + self.get_filename() for x in self.service.get_mirrors()]
+                S = [str(x) + self.get_filename().encode("utf8") for x in self.service.get_mirrors()]
             
-            torrent = mT(announce=str(self.service.torrent_announce), httpseeds=S)
+            torrent = mT(announce=str(self.service.get_announce()), httpseeds=S)
             torrent.single_file(str(self.get_archive_path()))
             
             content = ContentFile(torrent.getBencoded())
