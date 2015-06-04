@@ -205,10 +205,10 @@ class Mod(models.Model):
             #else:
             #    extra = [("torrent_magnet", "magnet")]
             
-        for key in ["category", "description", "filehash", "filesize", "homepage", "author"] + extra:
+        for key in [(self.category.name, "category"), "description", "filehash", "filesize", "homepage", "author"] + extra:
             if isinstance(key, basestring):
-                k = key
-                v = unicode(getattr(self, key))
+                v = key
+                k = getattr(self, key)
             else:
                 k, v = key
             if k:
