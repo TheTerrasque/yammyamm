@@ -207,7 +207,8 @@ class Mod(models.Model):
             
         for key in ["category", "description", "filehash", "filesize", "homepage", "author"] + extra:
             if isinstance(key, basestring):
-                k = v = key
+                k = key
+                v = getattr(self, key)
             else:
                 k, v = key
             if k:
