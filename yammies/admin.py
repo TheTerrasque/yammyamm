@@ -24,7 +24,7 @@ class JsonServiceAdmin(admin.ModelAdmin):
     fieldsets = [
         (None,            {'fields': ['name', "description", "active"]}),
         ('JSON data',     {'fields': ["json_name", "verbose_json", "json_file"]}),
-        ('Torrent creation',  {'fields': ["torrent_enable", "torrent_announce", "torrent_link", "torrent_minimum_bytes", "torrent_webseeds"]})
+        ('Torrent creation',  {'fields': ["torrent_enable", "torrent_announce", "torrent_path", "torrent_minimum_bytes", "torrent_webseeds"]})
     ]  
     
 admin.site.register(Mod, ModAdmin)

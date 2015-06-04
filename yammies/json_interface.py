@@ -29,6 +29,3 @@ def import_json(jsonfile, basefiledir, service):
             M.ModDependency.objects.create(mod=modentry, relation=2, dependency=dep)
         for dep in mod.get("recommends", []):
             M.ModDependency.objects.create(mod=modentry, relation=3, dependency=dep)
-
-
-    

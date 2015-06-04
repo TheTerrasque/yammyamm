@@ -3,13 +3,15 @@
 {% block main %}
     <div id="serviceinfo">
         <h2>{{ object.name }}</h2>
-        <pre>
+        <div id="description">
             {{ object.description|linebreaksbr}}
-        </pre>
+        </div>
+        <div id="jsonlink">
+            {% if object.json_file %}<a href="{{ object.json_file.url }}">JSON link</a>{% endif %}
+        </div>
     </div>
     
     <div id="mods">
-
             {% for m in object.get_mods %}
                 <div class="modentry boxentry">
                     <div class="floater">

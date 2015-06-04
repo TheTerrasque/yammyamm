@@ -19,6 +19,17 @@ try:
 except ImportError:
     mT = None
 
+class IgnorePostSave:
+    def __init__(self, function, sender):
+        self.function = function
+        self.sender = sender
+    
+    def __enter__(self):
+        post_save.disconnect(self.function, sender=self.sender)
+
+    def __exit__(self, type, value, traceback):
+        post_save.connect(self.function, sender=self.sender)
+    
 class OverwriteStorage(FileSystemStorage):
     '''
     Delete old file before saving new
@@ -41,26 +52,31 @@ class JsonService(models.Model):
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
         
-    json_name = models.SlugField(unique=True)
-    verbose_json = models.BooleanField(default=True)
+    json_name = models.SlugField(unique=True, help_text="Base name for json file")
+    verbose_json = models.BooleanField(default=True, help_text="Make the generated JSON file more readable. Turn off to save space")
     json_file = models.FileField(upload_to="service", storage=OverwriteStorage(), blank=True, null=True)
     
-    torrent_enable = models.BooleanField(default=False)
-    torrent_announce = models.CharField(max_length=200, blank=True, null=True)
-    TC = [
-        ("T", "Torrent file"),
-        ("M", "Magnet link (infohash)")
-    ]
-    torrent_link = models.CharField(max_length=2, choices = TC, blank=True, null=True)
-    torrent_minimum_bytes = models.PositiveIntegerField(default=1024*1024)
-    torrent_webseeds = models.BooleanField(default=True)
+    torrent_enable = models.BooleanField(default=False, help_text="Enable torrent gereration for mods connected to this service")
+    torrent_announce = models.CharField(max_length=200, default="udp://open.demonii.com:1337", blank=True, null=True)
+
+    torrent_path = models.CharField(max_length=200, blank=True, null=True)
+    torrent_minimum_bytes = models.PositiveIntegerField(default=5*1024*1024, help_text="Minimum size to generate a torrent for the mod")
+    torrent_webseeds = models.BooleanField(default=False, help_text="Add http link to the file in torrent. Largely unsupported, and requires at least one Host Mirror entry")
     
     def __unicode__(self):
         return self.name
 
     def get_mirrors(self):
-        return [x.url for x in self.hostmirror_set.filter(active=True)]
+        mirrors = self.hostmirror_set.filter(active=True)
+        if mirrors:
+            return [x.url for x in mirrors]
+        return [settings.MEDIA_URL + "mods/"]
 
+    def get_torrent_path(self):
+        if not self.torrent_path:
+            return settings.MEDIA_URL + "torrents/"
+        return self.torrent_path
+    
     def get_absolute_url(self):
         return reverse('mod:servicedetail', args=[str(self.id)])
     
@@ -72,32 +88,35 @@ class JsonService(models.Model):
     
     def export(self):
         if self.active:
-            post_save.disconnect(save_json5, sender=JsonService)
-
-            d = {
-                "mods": [],
-                "service": {
-                    "name": self.name,
-                    "filelocations": self.get_mirrors(),
-                }
+            service = {
+                "name": self.name,
+                "filelocations": self.get_mirrors(),
             }
+           
+            if self.torrent_enable:
+                service["torrents"] = self.get_torrent_path()
             
             if self.get_suggestions():
-                d["service"]["recommend"] = self.get_suggestions()
-            
+                service["recommend"] = self.get_suggestions()
+
+            mods = []
             for mod in self.get_mods():  
-                d["mods"].append(mod.create_json_entry())
+                mods.append(mod.create_json_entry())
+
+            d = {
+                "mods": mods,
+                "service": service
+            }
                 
             if self.verbose_json:
                 j = json.dumps(d, indent=4)
             else:
                 j = json.dumps(d)
             self.save_json(j)
-            
-            post_save.connect(save_json5, sender=JsonService)
 
     def save_json(self, data):
-        self.json_file.save(self.json_name + ".json", ContentFile(data))
+        with IgnorePostSave(save_json5, JsonService):
+            self.json_file.save(self.json_name + ".json", ContentFile(data))
 
     def get_suggestions(self):
         return [x.url for x in self.jsonservicesuggestion_set.all()]
@@ -157,6 +176,10 @@ class Mod(models.Model):
     def __unicode__(self):
         return self.name
     
+    @property
+    def torrent_filename(self):
+        return self.torrent_file and self.torrent_file.name[len("torrents/"):]
+    
     def get_yamm_link(self):
         link = "yamm:"
         
@@ -176,18 +199,19 @@ class Mod(models.Model):
             m["filename"] = self.get_filename()
             
         extra = []
-        if self.service.torrent_link == "T":
-            extra = [("torrent_file", "torrent")]
-        if self.service.torrent_link == "M":
-            extra = [("torrent_magnet", "magnet")]
+        
+        if self.service.torrent_enable:
+            extra = [(self.torrent_filename, "torrent")]
+            #else:
+            #    extra = [("torrent_magnet", "magnet")]
             
         for key in ["category", "description", "filehash", "filesize", "homepage", "author"] + extra:
             if isinstance(key, basestring):
                 k = v = key
             else:
                 k, v = key
-            if getattr(self, k):
-                m[v] = unicode(getattr(self, k))
+            if k:
+                m[v] = k
                 
         for depnr, deptype in enumerate(["depends", "provides", "conflicts", "recommends"]):
             entries = [x.dependency for x in self.get_dependencies().filter(relation=depnr).exclude(dependency=self.name)]
@@ -239,11 +263,6 @@ class Mod(models.Model):
     
     def get_absolute_url(self):
         return reverse('mod:moddetail', args=[str(self.id)])
-    
-    def save(self, *args, **kwargs):
-        super(Mod, self).save(*args, **kwargs)
-        self.update_file_data()
-        super(Mod, self).save(*args, **kwargs)
     
     def get_dependencies_detailed(self):
         D = []
@@ -304,4 +323,8 @@ def update_dependency_names(sender, instance, **kwargs):
 @receiver(post_save, sender=Mod)
 def save_json(sender, **kwargs):
     mod = kwargs["instance"]
+    with IgnorePostSave(save_json, Mod):
+        mod.update_file_data()
+        mod.create_torrent()
+        mod.save()
     mod.service.export()
