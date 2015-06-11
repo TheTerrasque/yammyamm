@@ -15,7 +15,7 @@ class ModAdmin(admin.ModelAdmin):
     fieldsets = [
         (None,            {'fields': ['name', "archive", "version", "category", "service"]}),
         ('Optional data', {'fields': ['description', "homepage", "author"]}),
-        ('Torrent data',  {'fields': ["torrent_file", "torrent_magnet"]})
+        ('Torrent data',  {'fields': ["torrent_file", "torrent_magnet"], 'classes': ('collapse',)})
     ]
     inlines = [ModDependencyInline]
     list_filter = ['category', "added", "service"]
