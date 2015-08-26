@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <h2>Add a new mod</h2>
+    <div id="newmod">
+        <form method="post" action=".">
+            <table>
+                {{ form }}
+                {% csrf_token %}
+            </table>
+            <input type="submit" value="Create new mod">
+        </form>
+    </div>
+{% endblock %}

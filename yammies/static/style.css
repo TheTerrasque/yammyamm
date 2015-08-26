@@ -6,7 +6,9 @@
 #main,#header {
     padding: 10px;
 }
-
+.warning {
+    color: #ff2525;
+}
 #header {
     border-bottom: 1px solid #7E7E7E;
     background-color: #eee;

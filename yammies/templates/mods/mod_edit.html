@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <h2>Edit mod</h2>
+    <div id="editmod">
+        <form method="post" action=".">
+            <table>
+                {{ form }}
+                {% csrf_token %}
+            </table>
+            <input type="submit" value="Update mod data">
+        </form>
+    </div>
+{% endblock %}

@@ -9,6 +9,11 @@
         <div id="jsonlink">
             {% if object.json_file %}<a href="{{ object.json_file.url }}">JSON link</a>{% endif %}
         </div>
+        {% ifequal object.owner user %}
+            <div>
+                <a href="{% url 'mod:mod_create' object.id %}">Add a mod</a>
+            </div>
+        {% endifequal %}
     </div>
     
     <div id="mods">

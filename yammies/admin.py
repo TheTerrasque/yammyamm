@@ -13,7 +13,7 @@ class ModAdmin(admin.ModelAdmin):
     list_display = ['name', 'version', "category"]
     search_fields = ['name', "description", "author", "homepage"]
     fieldsets = [
-        (None,            {'fields': ['name', "archive", "version", "category", "service"]}),
+        (None,            {'fields': ['name', "archive", "version", "category", "service", "created_by"]}),
         ('Optional data', {'fields': ['description', "homepage", "author"]}),
         ('Torrent data',  {'fields': ["torrent_file", "torrent_magnet"]})
     ]
@@ -22,7 +22,7 @@ class ModAdmin(admin.ModelAdmin):
 
 class JsonServiceAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None,            {'fields': ['name', "description", "active"]}),
+        (None,            {'fields': ['name', "description", "active", "owner"]}),
         ('JSON data',     {'fields': ["json_name", "verbose_json", "json_file"]}),
         ('Torrent creation',  {'fields': ["torrent_enable", "torrent_announce", "torrent_path", "torrent_minimum_bytes", "torrent_webseeds"]})
     ]  

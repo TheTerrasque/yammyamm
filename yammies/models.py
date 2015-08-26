@@ -14,6 +14,8 @@ from django.core.urlresolvers import reverse
 
 from django.core.files import File
 
+from django.contrib.auth.models import User
+
 try:
     from makeTorrent import makeTorrent as mT
 except ImportError:
@@ -62,6 +64,8 @@ class JsonService(models.Model):
     torrent_path = models.CharField(max_length=200, blank=True, null=True)
     torrent_minimum_bytes = models.PositiveIntegerField(default=5*1024*1024, help_text="Minimum size to generate a torrent for the mod")
     torrent_webseeds = models.BooleanField(default=False, help_text="Add http link to the file in torrent. Largely unsupported, and requires at least one Host Mirror entry")
+    
+    owner = models.ForeignKey(User)
     
     def __unicode__(self):
         return self.name
@@ -159,6 +163,7 @@ class Mod(models.Model):
     
     description = models.TextField(blank=True)
     long_description = models.TextField(blank=True)
+    changelog = models.TextField(blank=True)
     
     filesize = models.IntegerField(default=0)
     filehash = models.CharField(blank=True, null=True, max_length=90)
@@ -169,6 +174,8 @@ class Mod(models.Model):
     
     torrent_file = models.FileField(upload_to="torrents", blank=True, null=True, storage=OverwriteStorage())
     torrent_magnet = models.TextField(blank=True)
+    
+    created_by = models.ForeignKey(User)
     
     class Meta:
         ordering = ["name"]
@@ -261,6 +268,9 @@ class Mod(models.Model):
         else:
             self.filehash = None
             self.filesize = 0
+    
+    def get_edit_url(self):
+        return reverse('mod:mod_edit', args=[str(self.id)])
     
     def get_absolute_url(self):
         return reverse('mod:moddetail', args=[str(self.id)])
