@@ -13,7 +13,16 @@
     </div>
     <div id="relations">
         <h3>Mod relations</h3>
-        {{ object }}
+        <table>
+            {% for dep in object.get_dependencies  %}
+            <tr>
+                <td>{{ dep.get_relation_display }}</td>
+                <td>{{ dep.dependency }}</td>
+                <td><a href="{% url 'mod:mod_edit_relation' dep.id %}">Edit</a></td>
+                <td><a href="{% url 'mod:mod_remove_relation' dep.id %}">Remove</a></td>
+            </tr>
+            {% endfor %}    
+        </table>
         <div>
             <a href="{% url 'mod:mod_create_relation' object.id %}">Add a mod relation</a>
         </div>

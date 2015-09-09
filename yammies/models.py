@@ -308,6 +308,9 @@ class ModDependency(models.Model):
         if r:
             return r[0]
 
+    def get_absolute_url(self):
+        return reverse('mod:moddetail', args=[str(self.mod.id)])
+
 
 @receiver(post_save, sender=JsonService)
 def save_json5(sender, **kwargs):

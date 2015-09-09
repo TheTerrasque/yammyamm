@@ -88,27 +88,36 @@ class ModEdit(BV.LoginRequiredMixin, BV.UserPassesTestMixin, UpdateView):
     
     def get_success_url(self):
         return self.object.get_edit_url()
-    
-class ModCreateRelation(BV.LoginRequiredMixin, CreateView):
+
+class ModRelationMeta(BV.LoginRequiredMixin, BV.UserPassesTestMixin):
     model = M.ModDependency
     fields = ["relation", "dependency"]
-    template_name = "mods/mod_relation_create.html"
     
     def test_func(self, user):
-        self.active_mod = get_object_or_404(M.Mod, pk=self.kwargs["pk"])
-        return self.active_mod.created_by == user
+        return self.get_mod().created_by == user
     
+class ModCreateRelation(ModRelationMeta, CreateView):
+    template_name = "mods/mod_relation_create.html"
+
+    def get_mod(self):
+        return get_object_or_404(M.Mod, pk=self.kwargs["pk"])
+
     def form_valid(self, form):        
-        form.instance.mod = self.active_mod        
+        form.instance.mod = self.get_mod()      
         return super(ModCreateRelation, self).form_valid(form)
     
-class ModEditRelation(BV.LoginRequiredMixin, BV.UserPassesTestMixin, UpdateView):
-    model = M.ModDependency
-    fields = ["relation", "dependency"]
+class ModEditRelation(ModRelationMeta, UpdateView):
     template_name = "mods/mod_relation_edit.html"
-    
-    def test_func(self, user):
-        return self.object.mod.created_by == user
-    
+
+    def get_mod(self):
+        return get_object_or_404(M.ModDependency, pk=self.kwargs["pk"]).mod
+
     def get_success_url(self):
-        return self.object.get_edit_url()
+        return self.object.mod.get_edit_url()
+    
+class ModRemoveRelation(ModRelationMeta, DeleteView):
+    success_url = "/"
+    template_name = "mods/mod_relation_delete.html"
+    
+    def get_mod(self):
+        return get_object_or_404(M.ModDependency, pk=self.kwargs["pk"]).mod
