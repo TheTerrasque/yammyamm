@@ -1,11 +1,14 @@
 from django.conf.urls import url
 
-from .views import Home, ServiceDisplay, Services, ModDisplay, ModCreate, ModEdit
+from .views import ServiceDisplay, Services, ModDisplay, ModCreate, ModEdit, \
+                    ModCreateRelation, ModEditRelation
 
 urlpatterns = [
     url(r'^$', Services.as_view(), name='servicelist'),
     url(r'^service/(?P<pk>[0-9]+)/$', ServiceDisplay.as_view(), name='servicedetail'),
     url(r'^mods/(?P<pk>[0-9]+)/$', ModDisplay.as_view(), name="moddetail"),
     url(r'^mods/(?P<pk>[0-9]+)/edit/$', ModEdit.as_view(), name="mod_edit"),
+    url(r'^mods/(?P<pk>[0-9]+)/new_relation/$', ModCreateRelation.as_view(), name="mod_create_relation"),
+    url(r'^mods/relation/(?P<pk>[0-9]+)/edit/$', ModEditRelation.as_view(), name="mod_edit_relation"),
     url(r'^service/(?P<pk>[0-9]+)/addmod/$', ModCreate.as_view(), name="mod_create"),
 ]

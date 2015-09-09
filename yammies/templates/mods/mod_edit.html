@@ -11,4 +11,11 @@
             <input type="submit" value="Update mod data">
         </form>
     </div>
+    <div id="relations">
+        <h3>Mod relations</h3>
+        {{ object }}
+        <div>
+            <a href="{% url 'mod:mod_create_relation' object.id %}">Add a mod relation</a>
+        </div>
+    </div>
 {% endblock %}
