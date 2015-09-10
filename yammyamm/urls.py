@@ -25,5 +25,6 @@ urlpatterns = [
     url(r'^admin/lookups/', include(ajax_select_urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^mods/', include("yammies.urls", namespace='mod')),
-    url(r'^$', RedirectView.as_view(url='/mods/', permanent=False))
+    url(r'^$', RedirectView.as_view(url='/mods/', permanent=False)),
+    url('^', include('django.contrib.auth.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

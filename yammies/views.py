@@ -107,6 +107,9 @@ class ModCreateRelation(ModRelationMeta, CreateView):
         form.instance.mod = self.get_mod()      
         return super(ModCreateRelation, self).form_valid(form)
     
+    def get_success_url(self):
+        return self.object.mod.get_edit_url()
+    
 class ModEditRelation(ModRelationMeta, UpdateView):
     template_name = "mods/relation/mod_relation_edit.html"
 
@@ -122,3 +125,6 @@ class ModRemoveRelation(ModRelationMeta, DeleteView):
     
     def get_mod(self):
         return get_object_or_404(M.ModDependency, pk=self.kwargs["pk"]).mod
+    
+    def get_success_url(self):
+        return self.object.mod.get_edit_url()

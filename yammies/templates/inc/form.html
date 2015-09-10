@@ -1,5 +1,5 @@
-<form method="post" action="{{ url|default:"." }}">
-    <table>
+<form method="post" action="{{ url|default:"." }}" enctype="multipart/form-data">
+    <table class="forminput">
         {% csrf_token %}
         {{ form }}
     </table>

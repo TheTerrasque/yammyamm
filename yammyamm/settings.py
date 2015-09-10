@@ -27,6 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+LOGIN_REDIRECT_URL = 'mod:servicelist'
+
 # Application definition
 
 INSTALLED_APPS = (

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>{% block title %}YAMM Mod Service{% endblock %}</title>
+    <title>YAMM | {% block title %}Mod Service{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'style.css' %}">
   </head>
   <body>
@@ -11,9 +11,21 @@
         <li>
           <a href="{% url 'mod:servicelist' %}">Service list</a>
         </li>
+        
+        {% if user.is_authenticated %}
+          <li>
+            {{user}} - <a href="{% url 'logout' %}">Log out</a>
+          </li>
+          {% if user.is_staff %}
+            <li>
+              <a href="/admin">Admin</a>
+            </li>
+          {% endif %}
+        {% else %}
         <li>
-          <a href="/admin">Admin</a>
+          <a href="{% url 'login' %}">Log in</a>
         </li>
+        {% endif %}
       </ul>
     </div>
     <div id="main">
