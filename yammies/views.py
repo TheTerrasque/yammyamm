@@ -1,5 +1,6 @@
 #from django.shortcuts import render
 from . import models as M
+from . import forms as F
 # Create your views here.
 
 from django.views.generic import TemplateView
@@ -91,13 +92,13 @@ class ModEdit(BV.LoginRequiredMixin, BV.UserPassesTestMixin, UpdateView):
 
 class ModRelationMeta(BV.LoginRequiredMixin, BV.UserPassesTestMixin):
     model = M.ModDependency
-    fields = ["relation", "dependency"]
+    form_class = F.ModRelationForm
     
     def test_func(self, user):
         return self.get_mod().created_by == user
     
 class ModCreateRelation(ModRelationMeta, CreateView):
-    template_name = "mods/mod_relation_create.html"
+    template_name = "mods/relation/mod_relation_create.html"
 
     def get_mod(self):
         return get_object_or_404(M.Mod, pk=self.kwargs["pk"])
@@ -107,7 +108,7 @@ class ModCreateRelation(ModRelationMeta, CreateView):
         return super(ModCreateRelation, self).form_valid(form)
     
 class ModEditRelation(ModRelationMeta, UpdateView):
-    template_name = "mods/mod_relation_edit.html"
+    template_name = "mods/relation/mod_relation_edit.html"
 
     def get_mod(self):
         return get_object_or_404(M.ModDependency, pk=self.kwargs["pk"]).mod
@@ -117,7 +118,7 @@ class ModEditRelation(ModRelationMeta, UpdateView):
     
 class ModRemoveRelation(ModRelationMeta, DeleteView):
     success_url = "/"
-    template_name = "mods/mod_relation_delete.html"
+    template_name = "mods/relation/mod_relation_delete.html"
     
     def get_mod(self):
         return get_object_or_404(M.ModDependency, pk=self.kwargs["pk"]).mod

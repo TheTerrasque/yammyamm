@@ -1,0 +1,8 @@
+<form method="post" action="{{ url|default:"." }}">
+    <table>
+        {% csrf_token %}
+        {{ form }}
+    </table>
+    <input type="submit" value="{{ message|default:"Submit" }}">
+</form>
+{{ form.media }}
