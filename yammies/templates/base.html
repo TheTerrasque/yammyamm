@@ -14,7 +14,7 @@
         
         {% if user.is_authenticated %}
           <li>
-            {{user}} - <a href="{% url 'logout' %}">Log out</a>
+            {{user}} | <a href="{% url 'logout' %}">Log out</a>
           </li>
           {% if user.is_staff %}
             <li>
@@ -22,9 +22,9 @@
             </li>
           {% endif %}
         {% else %}
-        <li>
-          <a href="{% url 'login' %}">Log in</a>
-        </li>
+          <li>
+            <a href="{% url 'login' %}">Log in</a>
+          </li>
         {% endif %}
       </ul>
     </div>

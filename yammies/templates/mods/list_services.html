@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}Service list{% endblock %}
+
 {% block main %}
     <div id="yamminfo">
         <h3>
@@ -25,7 +27,7 @@
                     <span>{{ s.description }}</span>
                 </div>
                 <div class="footer">
-                    <span>{{ s.mod_set.count }} mods listed</span>
+                    <span>{{ s.get_mods.count }} mods listed</span>
                 </div>
             </div>
         {% endfor %}

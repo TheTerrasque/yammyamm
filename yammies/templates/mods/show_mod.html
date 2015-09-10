@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}{{ object.name }}{% endblock %}
+
 {% block main %}
     <div class="boxentry" id="mod">
         <div class="floater">
@@ -7,7 +9,7 @@
             {% if object.homepage %}<span class="homepage"><a href="{{object.homepage}}">[Mod Homepage]</a></span>{% endif %}
             {% ifequal object.created_by user %}
             <div>
-                <a href="{% url 'mod:mod_edit' object.id %}">[Edit mod]</a>
+                <a href="{% url 'mod:mod_edit' object.id %}">[Edit mod entry]</a>
             </div>
         {% endifequal %}    
         </div>

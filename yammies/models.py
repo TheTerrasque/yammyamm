@@ -87,9 +87,6 @@ class JsonService(models.Model):
     def get_mods(self):
         return self.mod_set.filter(active=True)
     
-    def get_mods_count(self):
-        return self.get_mods().count()
-    
     def get_announce(self):
         return str(self.torrent_announce)
     
