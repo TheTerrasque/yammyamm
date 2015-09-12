@@ -14,7 +14,7 @@
         
         {% if user.is_authenticated %}
           <li>
-            {{user}} | <a href="{% url 'logout' %}">Log out</a>
+            <a href="{% url "mod:user_mods" %}">{{user}}</a> | <a href="{% url 'logout' %}">Log out</a>
           </li>
           {% if user.is_staff %}
             <li>

@@ -8,10 +8,10 @@
             <div class="yammlink"><a href="{{ object.get_yamm_link }}" >[Open in YAMM]</a></div>
             {% if object.homepage %}<span class="homepage"><a href="{{object.homepage}}">[Mod Homepage]</a></span>{% endif %}
             {% ifequal object.created_by user %}
-            <div>
-                <a href="{% url 'mod:mod_edit' object.id %}">[Edit mod entry]</a>
-            </div>
-        {% endifequal %}    
+                <div>
+                    <a href="{% url 'mod:mod_edit' object.id %}">[Edit mod entry]</a>
+                </div>
+            {% endifequal %}    
         </div>
         <div class="header">
             <span class="title">{{ object.name }}</span>

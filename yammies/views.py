@@ -42,6 +42,9 @@ class AjaxableResponseMixin(object):
 
 class Home(TemplateView):
     template_name = "mods/index.html"
+
+class UserMods(BV.LoginRequiredMixin, TemplateView):
+    template_name = "mods/user_mods.html"
     
 class Services(ListView):
     queryset = M.JsonService.objects.filter(active=True)
