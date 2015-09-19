@@ -70,6 +70,9 @@ class JsonService(models.Model):
     def __unicode__(self):
         return self.name
 
+    def user_can_add_mod(self, user):
+        return user == self.owner
+
     def get_mirrors(self):
         mirrors = self.hostmirror_set.filter(active=True)
         if mirrors:

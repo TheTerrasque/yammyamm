@@ -5,8 +5,17 @@
 {% block main %}
 
 <h2>Player mods</h2>
-<div>Mods you have added</div>
+<div>Your mods</div>
 <table>
+    <thead>
+        <tr>
+            <td>Mod name</td>
+            <td>Status</td>
+            <td>Version</td>
+            <td>Homepage</td>
+        </tr>
+    </thead>
+    <tbody>
     {% for mod in user.mod_set.all %}
     <tr>
         <td><a href="{{ mod.get_absolute_url }}">{{ mod }}</a></td>
@@ -15,5 +24,6 @@
         <td>{% if mod.homepage %}<a href="{{ mod.homepage }}">Homepage</a>{% endif %}</td>
     </tr>
     {% endfor %}
+    </tbody>
 </table>
 {% endblock %}

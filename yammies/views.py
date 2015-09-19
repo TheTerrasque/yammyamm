@@ -62,6 +62,12 @@ class ServiceDisplay(DetailView):
     queryset = M.JsonService.objects.filter(active=True)
     template_name = "mods/show_service.html"
     
+    def get_context_data(self, **kwargs):
+        context = super(ServiceDisplay, self).get_context_data(**kwargs)
+        context["can_add_mod"] = self.object.user_can_add_mod(self.request.user)
+        return context
+    
+    
 class ModCreate(BV.LoginRequiredMixin, BV.UserPassesTestMixin, CreateView):
     model = M.Mod
     fields = ["name", "version", "category"]
@@ -69,7 +75,7 @@ class ModCreate(BV.LoginRequiredMixin, BV.UserPassesTestMixin, CreateView):
     
     def test_func(self, user):
         self.active_service = get_object_or_404(M.JsonService, pk=self.kwargs["pk"])
-        return self.active_service.owner == user
+        return self.active_service.user_can_add_mod(user)
     
     def get_success_url(self):
         return self.object.get_edit_url()
