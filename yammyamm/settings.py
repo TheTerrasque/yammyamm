@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+LOGIN_REDIRECT_URL = 'mod:servicelist'
 
 # Application definition
 
@@ -78,7 +79,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'yammyamm.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
@@ -88,7 +88,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -102,12 +101,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-YAMM_SERVICE = {
-    "name": "YAMM Mod Service"
-}
-YAMM_VERBOSE_JSON = True
-YAMM_EXPORT_PATH = "modules.json"
 
 HOSTNAME = "http://127.0.0.1:8000"
 

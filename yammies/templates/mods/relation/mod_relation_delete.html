@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <h2>Remove relation</h2>
+    <div>
+        This will remove this relation : "{{ object }}"
+    </div>
+    <div id="modrelation_remove">
+        {% include "inc/form.html" with message="Remove relation" %}
+    </div>
+{% endblock %}

@@ -1,19 +1,25 @@
 {% extends "base.html" %}
 
+{% block title %}{{ object.name }}{% endblock %}
+
 {% block main %}
     <div class="boxentry" id="mod">
         <div class="floater">
             <div class="yammlink"><a href="{{ object.get_yamm_link }}" >[Open in YAMM]</a></div>
             {% if object.homepage %}<span class="homepage"><a href="{{object.homepage}}">[Mod Homepage]</a></span>{% endif %}
-            
+            {% ifequal object.created_by user %}
+                <div>
+                    <a href="{% url 'mod:mod_edit' object.id %}">[Edit mod entry]</a>
+                </div>
+            {% endifequal %}    
         </div>
         <div class="header">
             <span class="title">{{ object.name }}</span>
             <span id="modversion">version {{ object.version }}</span>
             {% if object.author %}<span class="author">by {{ object.author|default:"???" }}.</span>{% endif %}
+            {% if not object.active %}<span class="warning">[Mod Not Active]</span>{% endif %}
         </div>
         
-    
         <div class="description">
             {{ object.description|linebreaksbr}}
         </div>

@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}{{ object.name }} mods{% endblock %}
+
 {% block main %}
     <div id="serviceinfo">
         <h2>{{ object.name }}</h2>
@@ -9,6 +11,11 @@
         <div id="jsonlink">
             {% if object.json_file %}<a href="{{ object.json_file.url }}">JSON link</a>{% endif %}
         </div>
+        {% if  can_add_mod %}
+            <div>
+                <a href="{% url 'mod:mod_create' object.id %}">Add a mod</a>
+            </div>
+        {% endif %}
     </div>
     
     <div id="mods">
