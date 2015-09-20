@@ -22,7 +22,8 @@ class ModAdmin(admin.ModelAdmin):
 
 class JsonServiceAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None,            {'fields': ['name', "description", "active", "owner"]}),
+        (None,            {'fields': ['name', "description", "active"]}),
+        ('Access',        {'fields': ["owner", "editors", "open_for_all"]}),
         ('JSON data',     {'fields': ["json_name", "verbose_json", "json_file"]}),
         ('Torrent creation',  {'fields': ["torrent_enable", "torrent_announce", "torrent_path", "torrent_minimum_bytes", "torrent_webseeds"]})
     ]  

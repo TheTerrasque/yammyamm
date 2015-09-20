@@ -65,13 +65,15 @@ class JsonService(models.Model):
     torrent_minimum_bytes = models.PositiveIntegerField(default=5*1024*1024, help_text="Minimum size to generate a torrent for the mod")
     torrent_webseeds = models.BooleanField(default=False, help_text="Add http link to the file in torrent. Largely unsupported, and requires at least one Host Mirror entry")
     
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, related_name="owned_services")
+    editors = models.ManyToManyField(User, blank=True, related_name="edit_services")
+    open_for_all = models.BooleanField(default=False)
     
     def __unicode__(self):
         return self.name
 
     def user_can_add_mod(self, user):
-        return user == self.owner
+        return user.is_authenticated() and (self.open_for_all or user == self.owner or user in self.editors.all())
 
     def get_mirrors(self):
         mirrors = self.hostmirror_set.filter(active=True)
