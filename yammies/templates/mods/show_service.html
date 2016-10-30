@@ -29,7 +29,7 @@
                     <div class="header">
                         <a href="{{ m.get_absolute_url }}">
                             <span class="title">{{ m }}</span>
-                            <span class="version">{{ m.version }}</span>
+                            <span class="version">{{ m.get_version }}</span>
                         </a>
                         {% if m.author %}<span class="author">by {{ m.author|default:"???" }}.</span>{% endif %}
                         Category <span class="category">{{ m.category }}</span>

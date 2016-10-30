@@ -158,27 +158,18 @@ class Mod(models.Model):
     service = models.ForeignKey(JsonService)
     
     name = models.CharField(db_index=True, max_length=30)
-    version = models.CharField(max_length=30)
     category = models.ForeignKey(ModCategory)
-    
-    archive = models.FileField(upload_to="mods", blank=True, null=True, storage=OverwriteStorage())
-    
+        
     updated = models.DateTimeField(auto_now=True)
     added = models.DateTimeField(auto_now_add=True)
     
     description = models.TextField(blank=True)
     long_description = models.TextField(blank=True)
-    changelog = models.TextField(blank=True)
     
-    filesize = models.IntegerField(default=0)
-    filehash = models.CharField(blank=True, null=True, max_length=90)
     homepage = models.CharField(null=True, blank=True, max_length=200)
     author = models.CharField(null=True, blank=True, max_length=60)
     
     active = models.BooleanField(default=True)
-    
-    torrent_file = models.FileField(upload_to="torrents", blank=True, null=True, storage=OverwriteStorage())
-    torrent_magnet = models.TextField(blank=True)
     
     created_by = models.ForeignKey(User)
     
@@ -188,9 +179,13 @@ class Mod(models.Model):
     def __unicode__(self):
         return self.name
     
+    def get_version(self):
+        return self.latest_version().version
+    
     @property
     def torrent_filename(self):
-        return self.torrent_file and self.torrent_file.name[len("torrents/"):]
+        lv = self.latest_version()
+        return lv.torrent_file and lv.torrent_file.name[len("torrents/"):]
     
     def get_yamm_link(self):
         link = "yamm:"
@@ -202,13 +197,17 @@ class Mod(models.Model):
         link = link + "mod:%s" % self.name
         return link
     
+    def get_versions(self):
+        return self.modversion_set.order_by("-id")
+    
+    def latest_version(self):
+        return self.get_versions()[0]
+    
     def create_json_entry(self):
+        
         m = {
             "name": self.name,
-            "version": self.version,
         }
-        if self.archive:
-            m["filename"] = self.get_filename()
             
         extra = []
         
@@ -217,7 +216,7 @@ class Mod(models.Model):
             #else:
             #    extra = [("torrent_magnet", "magnet")]
             
-        for key in ["category", "description", "filehash", "filesize", "homepage", "author"] + extra:
+        for key in ["category", "description", "homepage", "author"] + extra:
             if isinstance(key, basestring):
                 k = key
                 v = unicode(getattr(self, key))
@@ -235,45 +234,7 @@ class Mod(models.Model):
     
     def get_dependencies(self):
         return self.moddependency_set.all()
-    
-    def create_torrent(self):
-        if mT and self.service.torrent_enable and self.service.torrent_announce \
-                and self.archive and self.service.torrent_minimum_bytes < self.filesize:
-            
-            S = None
-            if self.service.torrent_webseeds:
-                S = [str(x) + self.get_filename().encode("utf8") for x in self.service.get_mirrors()]
-            
-            torrent = mT(announce=str(self.service.get_announce()), httpseeds=S)
-            torrent.single_file(str(self.get_archive_path()))
-            
-            content = ContentFile(torrent.getBencoded())
-            self.torrent_file.save(self.name + "_" + self.version + ".torrent", content, save=False)
-            
-            self.torrent_magnet = torrent.info_hash()
-
-    def import_file(self, filepath, filename=None):
-        of = File(open(filepath, "rb"))
-        if not filename:
-            filename = os.path.basename(filepath)
-        self.archive.save(filename, of, save=False)
-    
-    def get_filename(self):
-        return self.archive.name[len("mods/"):]
-            
-    def get_archive_path(self):
-        root = settings.MEDIA_ROOT or settings.BASE_DIR
-        return os.path.join(root, self.archive.name)
-    
-    def update_file_data(self):
-        if self.archive:
-            data = create_filedata.filedata(self.get_archive_path())
-            self.filehash = data["filehash"]
-            self.filesize = data["filesize"]
-        else:
-            self.filehash = None
-            self.filesize = 0
-    
+                
     def get_edit_url(self):
         return reverse('mod:mod_edit', args=[str(self.id)])
     
@@ -292,7 +253,77 @@ class Mod(models.Model):
                 D.append(d)
         return D
             
+
+class ModVersion(models.Model):
+    mod = models.ForeignKey(Mod)
+    archive = models.FileField(upload_to="mods", blank=True, null=True, storage=OverwriteStorage())
     
+    RELEASE_CHOICES = (
+        (0,"Release"),
+        (1,"Beta"),
+        (2,"Testing"),
+        (3,"Experimental"),
+        (1,"Alpha"),
+    )
+    
+    releasetype = models.IntegerField(default=0, choices=RELEASE_CHOICES)
+    
+    updated = models.DateTimeField(auto_now=True)
+    added = models.DateTimeField(auto_now_add=True)
+    
+    changelog = models.TextField(blank=True)
+    version = models.CharField(max_length=30)
+    
+    filesize = models.IntegerField(default=0)
+    filehash = models.CharField(blank=True, null=True, max_length=90)
+    
+    torrent_file = models.FileField(upload_to="torrents", blank=True, null=True, storage=OverwriteStorage())
+    torrent_magnet = models.TextField(blank=True)
+    
+    def import_file(self, filepath, filename=None):
+        of = File(open(filepath, "rb"))
+        if not filename:
+            filename = os.path.basename(filepath)
+        self.archive.save(filename, of, save=False)
+        
+    def get_archive_path(self):
+        root = settings.MEDIA_ROOT or settings.BASE_DIR
+        return os.path.join(root, self.archive.name)
+    
+    @property
+    def torrent_filename(self):
+        return self.torrent_file and self.torrent_file.name[len("torrents/"):]
+    
+    def create_torrent(self):
+        service = self.mod.service
+        
+        if mT and service.torrent_enable and service.torrent_announce \
+                and self.archive and service.torrent_minimum_bytes < self.filesize:
+            
+            S = None
+            if service.torrent_webseeds:
+                S = [str(x) + self.get_filename().encode("utf8") for x in self.service.get_mirrors()]
+            
+            torrent = mT(announce=str(service.get_announce()), httpseeds=S)
+            torrent.single_file(str(self.get_archive_path()))
+            
+            content = ContentFile(torrent.getBencoded())
+            self.torrent_file.save(self.name + "_" + self.version + ".torrent", content, save=False)
+            
+            self.torrent_magnet = torrent.info_hash()
+    
+    def get_filename(self):
+        return self.archive.name[len("mods/"):]
+    
+    def update_file_data(self):
+        if self.archive:
+            data = create_filedata.filedata(self.get_archive_path())
+            self.filehash = data["filehash"]
+            self.filesize = data["filesize"]
+        else:
+            self.filehash = None
+            self.filesize = 0
+            
 DEPENDENCY = [
     (0, "Requires"),
     (1, "Provides"),

@@ -87,9 +87,33 @@ class ModCreate(BV.LoginRequiredMixin, BV.UserPassesTestMixin, CreateView):
         
         return super(ModCreate, self).form_valid(form)
 
+class ModVersionCreate(BV.LoginRequiredMixin, BV.UserPassesTestMixin, CreateView):
+    model = M.ModVersion
+    fields = ["mod", "version", "archive", "changelog"]
+    template_name = "mods/modversion_create.html"
+    
+    def test_func(self, user):
+        obj = get_object_or_404(M.Mod, pk=self.kwargs["modid"])
+        return obj.created_by == user
+    
+    def get_success_url(self):
+        return self.object.get_edit_url()
+
+class ModVersionEdit(BV.LoginRequiredMixin, BV.UserPassesTestMixin, UpdateView):
+    model = M.ModVersion
+    fields = ["mod", "version", "archive", "changelog"]
+    template_name = "mods/modversion_create.html"
+    
+    def test_func(self, user):
+        obj = get_object_or_404(M.Mod, pk=self.kwargs["pk"])
+        return obj.created_by == user
+    
+    def get_success_url(self):
+        return self.object.get_edit_url()
+    
 class ModEdit(BV.LoginRequiredMixin, BV.UserPassesTestMixin, UpdateView):
     model = M.Mod
-    fields = ["name", "version", "category", "description", "homepage", "author", "archive", "active", "changelog", "long_description"]
+    fields = ["name", "category", "description", "homepage", "author", "active", "long_description"]
     template_name = "mods/mod_edit.html"
     
     def test_func(self, user):

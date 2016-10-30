@@ -4,23 +4,44 @@
 
 {% block main %}
     <h2>Edit mod</h2>
-    <div id="editmod">
-        {% include "inc/form.html" with message="Update mod data" %}
-    </div>
-    <div id="relations">
-        <h3>Mod relations</h3>
-        <table>
-            {% for dep in object.get_dependencies  %}
-            <tr>
-                <td>{{ dep.get_relation_display }}</td>
-                <td>{{ dep.dependency }}</td>
-                <td><a href="{% url 'mod:mod_edit_relation' dep.id %}">Edit</a></td>
-                <td><a href="{% url 'mod:mod_remove_relation' dep.id %}">Remove</a></td>
-            </tr>
-            {% endfor %}    
-        </table>
-        <div>
-            <a href="{% url 'mod:mod_create_relation' object.id %}">Add a mod relation</a>
+    <div id="container">
+        <div id="editmod">
+            {% include "inc/form.html" with message="Update mod data" %}
+        </div>
+        <div id="versions">
+            
+            <h3>Mod versions</h3>
+                        <div>
+                <a href="{% url 'mod:mod_create_version' object.id %}">Add a new version</a>
+            </div>
+            <table>
+                {% for mversion in object.get_versions  %}
+                <tr>
+                    <td>{{ mversion.version }}</td>
+                    <td>{{ mversion.added }}</td>
+                    <td><a href="{% url 'mod:mod_edit_version' mversion.id %}">Edit</a></td>
+                    <td><a href="{% url 'mod:mod_remove_version' mversion.id %}">Remove</a></td>
+                </tr>
+                {% endfor %}    
+            </table>
+        </div>
+        
+        <div id="relations">
+            <h3>Mod relations</h3>
+            <div>
+                <a href="{% url 'mod:mod_create_relation' object.id %}">Add a mod relation</a>
+            </div>
+            <table>
+                {% for dep in object.get_dependencies  %}
+                <tr>
+                    <td>{{ dep.get_relation_display }}</td>
+                    <td>{{ dep.dependency }}</td>
+                    <td><a href="{% url 'mod:mod_edit_relation' dep.id %}">Edit</a></td>
+                    <td><a href="{% url 'mod:mod_remove_relation' dep.id %}">Remove</a></td>
+                </tr>
+                {% endfor %}    
+            </table>
+
         </div>
     </div>
 {% endblock %}

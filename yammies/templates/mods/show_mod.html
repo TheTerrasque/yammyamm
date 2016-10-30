@@ -15,7 +15,7 @@
         </div>
         <div class="header">
             <span class="title">{{ object.name }}</span>
-            <span id="modversion">version {{ object.version }}</span>
+            <span id="modversion">Latest version {{ object.get_version }}</span>
             {% if object.author %}<span class="author">by {{ object.author|default:"???" }}.</span>{% endif %}
             {% if not object.active %}<span class="warning">[Mod Not Active]</span>{% endif %}
         </div>
@@ -24,10 +24,14 @@
             {{ object.description|linebreaksbr}}
         </div>
         
+        {% for mversion in object.get_versions %}
         <div class="dlbox">
-            {% if object.torrent_file %}<div><a href="{{ object.torrent_file.url }}">Download via BitTorrent</a></div>{% endif %}
-            {% if object.archive %}<div><a href="{{ object.archive.url }}">Download directly ({{ object.filesize|filesizeformat }})</a></div>{% endif %}
+            <div>{{ mversion.version }} - {{mversion.get_releasetype_display}} - Added {{  mversion.added }}</div>
+            {% if mversion.torrent_file %}<div><a href="{{ mversion.torrent_file.url }}">Download via BitTorrent</a></div>{% endif %}
+            {% if mversion.archive %}<div><a href="{{ mversion.archive.url }}">Download directly ({{ mversion.filesize|filesizeformat }})</a></div>{% endif %}
+            {% if mversion.changelog %}<div class="changelog">Changelog<div class="changelog_inner">{{ mversion.changelog|linebreaksbr }}</div></div>{% endif %}
         </div>
+        {% endfor %}
         
         <div class="footer">
             <div>Part of the <a href="{{ object.service.get_absolute_url }}">{{ object.service.name }}</a> service</div>

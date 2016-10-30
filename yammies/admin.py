@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Mod, ModCategory, ModDependency, HostMirror, JsonService, JsonServiceSuggestion
+from .models import Mod, ModCategory, ModDependency, HostMirror, JsonService, JsonServiceSuggestion, ModVersion
 
 from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdminTabularInline
@@ -9,13 +9,21 @@ class ModDependencyInline(AjaxSelectAdminTabularInline):
     form = make_ajax_form(ModDependency, {'dependency': 'mod'})
     extra = 5
 
+class ModVersionAdmin(admin.ModelAdmin):
+    list_display = ['mod', 'version', "archive", "releasetype", "filesize"]
+    search_fields = ['mod__name']
+    fieldsets = [
+        (None,            {'fields': ["archive", "version", "changelog", "releasetype"]}),
+        ('Torrent data',  {'fields': ["torrent_file", "torrent_magnet"]})
+    ]
+    list_filter = ['releasetype']
+
 class ModAdmin(admin.ModelAdmin):
-    list_display = ['name', 'version', "category"]
+    list_display = ['name', "category"]
     search_fields = ['name', "description", "author", "homepage"]
     fieldsets = [
-        (None,            {'fields': ['name', "archive", "version", "category", "service", "created_by"]}),
+        (None,            {'fields': ['name', "category", "service", "created_by"]}),
         ('Optional data', {'fields': ['description', "homepage", "author"]}),
-        ('Torrent data',  {'fields': ["torrent_file", "torrent_magnet"]})
     ]
     inlines = [ModDependencyInline]
     list_filter = ['category', "added", "service"]
@@ -29,6 +37,7 @@ class JsonServiceAdmin(admin.ModelAdmin):
     ]  
     
 admin.site.register(Mod, ModAdmin)
+admin.site.register(ModVersion, ModVersionAdmin)
 admin.site.register(ModCategory)
 admin.site.register(HostMirror)
 admin.site.register(JsonServiceSuggestion)
